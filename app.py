@@ -21,6 +21,7 @@ class Score(db.Model):
     totaal = db.Column(db.Integer)
     
 class Competitie(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     CompetitieKeuzeu = db.Column(db.Integer)
 
 @app.cli.command("init-db")
