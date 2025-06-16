@@ -105,13 +105,6 @@ def scores():
 
 @app.route('/scoreboard')
 def scoreboard():
-    competitie = request.form['competitie']
-    competitieKeuze = session['competitie']
-    
-   
-    
-    naam = session['user']
-    
     # Haal alle spelers en tel hun totaalscores op
     spelers = db.session.query(
         Score.naam,
