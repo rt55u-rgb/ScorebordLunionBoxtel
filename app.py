@@ -22,7 +22,7 @@ class Score(db.Model):
     
 class Competitie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    CompetitieKeuzeu = db.Column(db.Integer)
+    CompetitieKeuze = db.Column(db.Integer)
 
 @app.cli.command("init-db")
 def init_db():
@@ -64,7 +64,7 @@ def wedstrijdleiding():
             session.modified = True
             return redirect(url_for('wedstrijdleiding'))
 
-    huidige_competitie = db.session.query(Competitie.competitiekeuze).all()
+    huidige_competitie = db.session.query(Competitie.CompetitieKeuze).all()
     db.session.commit()
     return render_template('wedstrijdleiding.html', geselecteerd=huidige_competitie)
 
