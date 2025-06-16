@@ -89,6 +89,7 @@ def scores():
     if request.method == 'POST':
         try:
             p1 = int(request.form.get('p1',0))
+            
             p2 = int(request.form.get('p2',0))
             p3 = int(request.form.get('p3',0))
         except ValueError:
@@ -101,7 +102,11 @@ def scores():
         nieuwe_serie = laatste_serie + 1
 
         # Subtotaal van deze serie
-        subtotaal = p1 + p2 + p3
+        if competitie == 3 :
+            subtotaal = p1 + p2 + p3
+        
+        if competitie == 1 :
+            subtotaal = p1
 
         # Huidige totaal berekenen (alle eerdere subtotale scores)
         eerder_subtotaal = db.session.query(db.func.sum(Score.subtotaal)).filter_by(naam=naam).scalar()
