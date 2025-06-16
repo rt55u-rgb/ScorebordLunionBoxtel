@@ -115,7 +115,8 @@ def scores():
 
 @app.route('/scoreboard')
 def scoreboard():
-    aantal_pijlen = session['competitie']
+    competitie = session.get('competitie', '3')  # default naar 3 pijlen
+    aantal_pijlen = int(competitie)
     # Haal alle spelers en tel hun totaalscores op
     spelers = db.session.query(
         Score.naam,
@@ -140,7 +141,7 @@ def scoreboard():
             'serie' : speler.serie or 0
         })
 
-    return render_template('scoreboard.html', data=scoreboard_data, competitie=aantal_pijlen)
+    return render_template('scoreboard.html', data=scoreboard_data, aantal_pijlen=aantal_pijlen)
 
 @app.route('/reset')
 def reset_scores():
