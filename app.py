@@ -34,16 +34,24 @@ def index():
 
 @app.route('/wedstrijdleiding', methods=['GET', 'POST'])
 def wedstrijdleiding():
+    vorige_competitie = session.get('competitie', None)
+
     if request.method == 'POST':
-        competitie = request.form.get('competitie')
-        if competitie:
-            session['competitie'] = competitie
+        nieuwe_competitie = request.form.get('competitie')
+
+        if nieuwe_competitie:
+            # Als de competitie verandert, verwijder alle scores
+            if vorige_competitie and nieuwe_competitie != vorige_competitie:
+                db.session.query(Score).delete()  # Verwijder alle scores uit database
+                db.session.commit()
+
+            session['competitie'] = nieuwe_competitie
             session.modified = True
-            return redirect(url_for('wedstrijdleiding'))  # blijf op deze pagina
+            return redirect(url_for('wedstrijdleiding'))
 
-    huidige_competitie = session.get('competitie', '3')  # standaard 3
-
+    huidige_competitie = session.get('competitie', '3')  # default
     return render_template('wedstrijdleiding.html', geselecteerd=huidige_competitie)
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
