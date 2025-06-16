@@ -29,18 +29,17 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    header {
-      background-color: #0056b3;
+    .header {
+      background-color: #0056b3; /* Donkerblauw */
       color: white;
-      padding: 15px 10px;
-      font-size: 20px;
-      text-align: center;
-      margin-bottom: 20px;
+      padding: 20px 10px;
+      font-size: 18px;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      flex-wrap: wrap;
+      text-align: center;
     }
 
     .logo {
@@ -88,14 +87,12 @@
   </style>
 </head>
 <body>
-  <header>
-    
+
+  <div class="container">
+    <div class="header">
       <img src="{{ url_for('static', filename='lunion3_no_background.png') }}" alt="Logo" class="logo">
       Scoresysteem L'Union Boxtel
-   
-  </header>
-  <div class="container">
-    
+    </div>
     <form method="POST">
       <label for="naam">Naam:</label>
       <input type="text" name="naam" id="naam" placeholder="Vul hier je naam in" required>
