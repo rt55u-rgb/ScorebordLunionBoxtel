@@ -87,12 +87,14 @@
   </style>
 </head>
 <body>
-
-  <div class="container">
+  <header
     <div class="header">
       <img src="{{ url_for('static', filename='lunion3_no_background.png') }}" alt="Logo" class="logo">
       Scoresysteem L'Union Boxtel
     </div>
+</header>
+  <div class="container">
+    
     <form method="POST">
       <label for="naam">Naam:</label>
       <input type="text" name="naam" id="naam" placeholder="Vul hier je naam in" required>
