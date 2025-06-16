@@ -20,6 +20,8 @@ class Score(db.Model):
     subtotaal = db.Column(db.Integer)
     totaal = db.Column(db.Integer)
     
+class Competitie(db.Model):
+    CompetitieKeuzeu = db.Column(db.Integer)
 
 @app.cli.command("init-db")
 def init_db():
@@ -40,6 +42,16 @@ def wedstrijdleiding():
         nieuwe_competitie = request.form.get('competitie')
 
         if nieuwe_competitie:
+            db.session.query(Competitie).delete()
+            db.session.commit()
+
+            huidige_competitie = Competitie(
+                CompetitieKeuzeu=nieuwe_competitie
+            )
+
+            db.session.add(huidige_competitie)
+            db.session.commit()
+            
             # Als de competitie verandert, verwijder alle scores
             if vorige_competitie and nieuwe_competitie != vorige_competitie:
                 db.session.query(Score).delete()  # Verwijder alle scores uit database
@@ -49,7 +61,7 @@ def wedstrijdleiding():
             session.modified = True
             return redirect(url_for('wedstrijdleiding'))
 
-    huidige_competitie = session.get('competitie', '3')  # default
+    
     return render_template('wedstrijdleiding.html', geselecteerd=huidige_competitie)
 
 
