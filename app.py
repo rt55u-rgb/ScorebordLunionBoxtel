@@ -37,7 +37,7 @@ def wedstrijdleiding():
     if request.method == 'POST':
         competitie = request.form['competitie']
         session['competitie'] = competitie
-        return redirect(url_for('scoreboard')) 
+        return redirect(url_for('wedstrijdleiding')) 
     return render_template('wedstrijdleiding.html')
 
 @app.route('/login', methods=['GET', 'POST'])
