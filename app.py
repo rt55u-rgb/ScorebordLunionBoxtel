@@ -104,7 +104,7 @@ def scores():
         # Subtotaal van deze serie
         if competitie == 1 :
             subtotaal = p1
-        else 
+        else :
             subtotaal = p1 + p2 + p3
         
 
