@@ -46,13 +46,15 @@ def wedstrijdleiding():
             db.session.query(Competitie).delete()
             db.session.commit()
 
-            huidige_competitie = Competitie(
+            NieuweComp = Competitie(
                 CompetitieKeuzeu=nieuwe_competitie
             )
 
-            db.session.add(huidige_competitie)
+            db.session.add(NieuweComp)
             db.session.commit()
             
+
+
             # Als de competitie verandert, verwijder alle scores
             if vorige_competitie and nieuwe_competitie != vorige_competitie:
                 db.session.query(Score).delete()  # Verwijder alle scores uit database
@@ -62,7 +64,8 @@ def wedstrijdleiding():
             session.modified = True
             return redirect(url_for('wedstrijdleiding'))
 
-    
+    huidige_competitie = db.session.query(Competitie.competitiekeuze).all()
+    db.session.commit()
     return render_template('wedstrijdleiding.html', geselecteerd=huidige_competitie)
 
 
