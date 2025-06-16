@@ -133,30 +133,42 @@ from flask import jsonify
 
 @app.route('/api/scoreboard')
 def api_scoreboard():
-    aantal_pijlen = session.get('competitie', 3)  # standaard 3 pijlen als fallback
+    competitie = session.get('competitie', '3')
+    aantal_pijlen = int(competitie)
     klasse = session.get('klasse', '')
+
+    # Bepaal hoogste serie-nummer in deze competitie
+    huidige_serie = db.session.query(db.func.max(Score.serie)) \
+        .filter(Score.competitie == competitie).scalar()
+    huidige_serie = huidige_serie or 0
 
     spelers = db.session.query(
         Score.naam,
         db.func.sum(Score.subtotaal).label('totaal'),
         db.func.max(Score.id).label('laatste_id')
-    ).group_by(Score.naam).order_by(db.desc('totaal')).all()
+    ).filter(Score.competitie == competitie) \
+     .group_by(Score.naam).order_by(db.desc('totaal')).all()
 
     scoreboard_data = []
     for i, speler in enumerate(spelers, start=1):
-        laatste_score = Score.query.filter_by(naam=speler.naam).order_by(Score.id.desc()).first()
+        laatste_score = Score.query.filter_by(naam=speler.naam, competitie=competitie).order_by(Score.id.desc()).first()
         scoreboard_data.append({
             'rang': i,
             'naam': speler.naam,
             'klasse': klasse,
             'p1': laatste_score.p1 if laatste_score else 0,
-            'p2': laatste_score.p2 if laatste_score else 0,
-            'p3': laatste_score.p3 if laatste_score else 0,
-            'subtotaal': speler.totaal or 0,
+            'p2': laatste_score.p2 if laatste_score and aantal_pijlen == 3 else '',
+            'p3': laatste_score.p3 if laatste_score and aantal_pijlen == 3 else '',
+            'subtotaal': laatste_score.subtotaal if laatste_score else 0,
             'totaal': speler.totaal or 0,
         })
 
-    return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen, 'klasse':klasse})
+    return jsonify({
+        'data': scoreboard_data,
+        'aantal_pijlen': aantal_pijlen,
+        'klasse': klasse,
+        'huidige_serie': huidige_serie
+    })
 
 @app.route('/scoreboard')
 def scoreboard():

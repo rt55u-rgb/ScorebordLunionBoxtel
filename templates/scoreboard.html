@@ -153,13 +153,25 @@
       console.error('Fout bij ophalen scoreboard data');
       return;
     }
+
     const result = await response.json();
 
     const data = result.data;
     const aantal_pijlen = result.aantal_pijlen;
+    const huidige_serie = result.huidige_serie || 0;
 
+    // Update de serie rechtsboven
+    const serieTekst = huidige_serie > 0 
+      ? `Serie: ${huidige_serie}` 
+      : 'Nog geen series geschoten';
+    const serieElement = document.querySelector('.top-right-text');
+    if (serieElement) {
+      serieElement.textContent = serieTekst;
+    }
+
+    // Bouw de tabel opnieuw op
     const tbody = document.querySelector('tbody');
-    tbody.innerHTML = ''; // lege tabel
+    tbody.innerHTML = ''; // leeg de tabel
 
     data.forEach(speler => {
       const tr = document.createElement('tr');
