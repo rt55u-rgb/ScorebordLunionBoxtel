@@ -99,12 +99,12 @@
     <p>Competitie: Indoor</p>
     {%endif%}
 
-    {% if data|length > 0 %}
+   
+    <table> {% if data|length > 0 %}
     <div class="top-right-text">Serie: {{ data[0].serie }}</div>
     {% else %}
     <div class="top-right-text">Nog geen series geschoten</div>
     {% endif %}
-    <table>
       <thead>
         <tr>
           <th>Nm.</th>
