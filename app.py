@@ -102,11 +102,11 @@ def scores():
         nieuwe_serie = laatste_serie + 1
 
         # Subtotaal van deze serie
-        if competitie == 3 :
-            subtotaal = p1 + p2 + p3
-        
         if competitie == 1 :
             subtotaal = p1
+        else 
+            subtotaal = p1 + p2 + p3
+        
 
         # Huidige totaal berekenen (alle eerdere subtotale scores)
         eerder_subtotaal = db.session.query(db.func.sum(Score.subtotaal)).filter_by(naam=naam).scalar()
