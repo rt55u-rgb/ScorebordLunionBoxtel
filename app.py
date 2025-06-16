@@ -8,9 +8,7 @@ app.secret_key = 'jouw_geheime_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
-@app.before_request
-def create_tables():
-    db.create_all()
+
 
 class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -34,43 +32,24 @@ def index():
         return redirect(url_for('scores'))
     return redirect(url_for('login'))
 
-class Config(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.String(50), unique=True, nullable=False)
-    value = db.Column(db.String(100), nullable=False)
-
-def get_competitie():
-    config = Config.query.filter_by(key='competitie').first()
-    if config:
-        return int(config.value)
-    else:
-        # default competitie (bijv. 3 pijlen)
-        return 3
-
-def set_competitie(nieuwe_waarde):
-    config = Config.query.filter_by(key='competitie').first()
-    if config:
-        config.value = str(nieuwe_waarde)
-    else:
-        config = Config(key='competitie', value=str(nieuwe_waarde))
-        db.session.add(config)
-    db.session.commit()
-
-
 @app.route('/wedstrijdleiding', methods=['GET', 'POST'])
 def wedstrijdleiding():
-    oude_competitie = get_competitie()
+    vorige_competitie = session.get('competitie', None)
 
     if request.method == 'POST':
-        nieuwe_competitie = int(request.form.get('competitie'))
-        if nieuwe_competitie != oude_competitie:
-            # Verwijder alle scores als competitie verandert
-            db.session.query(Score).delete()
-            db.session.commit()
-            set_competitie(nieuwe_competitie)
-        return redirect(url_for('wedstrijdleiding'))
+        nieuwe_competitie = request.form.get('competitie')
 
-    huidige_competitie = get_competitie()
+        if nieuwe_competitie:
+            # Als de competitie verandert, verwijder alle scores
+            if vorige_competitie and nieuwe_competitie != vorige_competitie:
+                db.session.query(Score).delete()  # Verwijder alle scores uit database
+                db.session.commit()
+
+            session['competitie'] = nieuwe_competitie
+            session.modified = True
+            return redirect(url_for('wedstrijdleiding'))
+
+    huidige_competitie = session.get('competitie', '3')  # default
     return render_template('wedstrijdleiding.html', geselecteerd=huidige_competitie)
 
 
@@ -154,31 +133,42 @@ from flask import jsonify
 
 @app.route('/api/scoreboard')
 def api_scoreboard():
-    aantal_pijlen = get_competitie()  # centraal uit db halen
-    klasse = session.get('klasse', '')  # of waar je klasse ook opslaat
+    competitie = session.get('competitie', '3')
+    aantal_pijlen = int(competitie)
+    klasse = session.get('klasse', '')
+
+    # Bepaal hoogste serie-nummer in deze competitie
+    huidige_serie = db.session.query(db.func.max(Score.serie)) \
+        .filter(Score.competitie == competitie).scalar()
+    huidige_serie = huidige_serie or 0
 
     spelers = db.session.query(
         Score.naam,
         db.func.sum(Score.subtotaal).label('totaal'),
         db.func.max(Score.id).label('laatste_id')
-    ).group_by(Score.naam).order_by(db.desc('totaal')).all()
+    ).filter(Score.competitie == competitie) \
+     .group_by(Score.naam).order_by(db.desc('totaal')).all()
 
     scoreboard_data = []
     for i, speler in enumerate(spelers, start=1):
-        laatste_score = Score.query.filter_by(naam=speler.naam).order_by(Score.id.desc()).first()
+        laatste_score = Score.query.filter_by(naam=speler.naam, competitie=competitie).order_by(Score.id.desc()).first()
         scoreboard_data.append({
             'rang': i,
             'naam': speler.naam,
             'klasse': klasse,
             'p1': laatste_score.p1 if laatste_score else 0,
-            'p2': laatste_score.p2 if laatste_score else 0,
-            'p3': laatste_score.p3 if laatste_score else 0,
-            'subtotaal': speler.totaal or 0,
+            'p2': laatste_score.p2 if laatste_score and aantal_pijlen == 3 else '',
+            'p3': laatste_score.p3 if laatste_score and aantal_pijlen == 3 else '',
+            'subtotaal': laatste_score.subtotaal if laatste_score else 0,
             'totaal': speler.totaal or 0,
         })
 
-    return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen, 'klasse': klasse})
-
+    return jsonify({
+        'data': scoreboard_data,
+        'aantal_pijlen': aantal_pijlen,
+        'klasse': klasse,
+        'huidige_serie': huidige_serie
+    })
 
 @app.route('/scoreboard')
 def scoreboard():
