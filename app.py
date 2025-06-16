@@ -8,6 +8,8 @@ app.secret_key = 'jouw_geheime_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
+
+
 class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     naam = db.Column(db.String(150), nullable=False)
@@ -35,6 +37,8 @@ def wedstrijdleiding():
     if request.method == 'POST':
         competitie = request.form['competitie']
         session['competitie'] = competitie
+        aantal_pijlen = session['competitie']
+    return render_template('wedstrijdleiding.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -111,6 +115,7 @@ def scores():
 
 @app.route('/scoreboard')
 def scoreboard():
+    aantal_pijlen = session['competitie']
     # Haal alle spelers en tel hun totaalscores op
     spelers = db.session.query(
         Score.naam,
@@ -135,7 +140,7 @@ def scoreboard():
             'serie' : speler.serie or 0
         })
 
-    return render_template('scoreboard.html', data=scoreboard_data)
+    return render_template('scoreboard.html', data=scoreboard_data, competitie=aantal_pijlen)
 
 @app.route('/reset')
 def reset_scores():

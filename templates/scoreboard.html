@@ -106,7 +106,7 @@
           <th>Naam</th>
           <th>klasse</th>
           <th>Pijl 1</th>
-          {% if {{ session['Klasse'] }} ==3 %}
+          {% if aantal_pijlen == 3 %}
           <th>Pijl 2</th>
           <th>Pijl 3</th>
           {% endif %}
@@ -121,7 +121,7 @@
           <td>{{ speler.naam }}</td>
           <td>{{ session['klasse'] }}</td>
           <td>{{ speler.p1 }}</td>
-          {% if {{ session['Klasse'] }} ==3 %}
+          {% if aantal_pijlen == 3 %}
           <td>{{ speler.p2 }}</td>
           <td>{{ speler.p3 }}</td>
           {% endif %}
