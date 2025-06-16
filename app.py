@@ -72,6 +72,8 @@ def logout():
 
 @app.route('/scores', methods=['GET', 'POST'])
 def scores():
+    competitie = session.get('competitie', '3')  # default naar 3 pijlen
+    aantal_pijlen = int(competitie)
     if 'user' not in session:
         return redirect(url_for('login'))
     naam = session['user']
@@ -117,11 +119,11 @@ def scores():
 
     # Laatste 10 scores van deze gebruiker tonen
     laatste_scores = Score.query.filter_by(naam=naam).order_by(Score.id.desc()).limit(10).all()
-    return render_template('scores.html', scores=laatste_scores)
+    return render_template('scores.html', scores=laatste_scores, aantal_pijlen=aantal_pijlen)
 
 @app.route('/scoreboard')
 def scoreboard():
-    print("Session inhoud:", session)
+    
     competitie = session.get('competitie', '3')  # default naar 3 pijlen
     aantal_pijlen = int(competitie)
     # Haal alle spelers en tel hun totaalscores op
