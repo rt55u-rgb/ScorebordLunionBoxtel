@@ -8,7 +8,9 @@ app.secret_key = 'jouw_geheime_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
-
+@app.before_request
+def create_tables():
+    db.create_all()
 
 class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
