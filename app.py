@@ -129,21 +129,18 @@ def scores():
     laatste_scores = Score.query.filter_by(naam=naam).order_by(Score.id.desc()).limit(10).all()
     return render_template('scores.html', scores=laatste_scores, aantal_pijlen=aantal_pijlen)
 
-@app.route('/scoreboard')
-def scoreboard():
-    
-    competitie = session.get('competitie', '3')  # default naar 3 pijlen
-    aantal_pijlen = int(competitie)
-    # Haal alle spelers en tel hun totaalscores op
+from flask import jsonify
+
+@app.route('/api/scoreboard')
+def api_scoreboard():
+    aantal_pijlen = session.get('competitie', 3)  # standaard 3 pijlen als fallback
+
     spelers = db.session.query(
         Score.naam,
         db.func.sum(Score.subtotaal).label('totaal'),
-        db.func.max(Score.id).label('laatste_id'),
-        Score.subtotaal,
-        Score.serie,
+        db.func.max(Score.id).label('laatste_id')
     ).group_by(Score.naam).order_by(db.desc('totaal')).all()
 
-    # Per speler ook de laatste serie ophalen (voor de pijlwaarden)
     scoreboard_data = []
     for i, speler in enumerate(spelers, start=1):
         laatste_score = Score.query.filter_by(naam=speler.naam).order_by(Score.id.desc()).first()
@@ -153,12 +150,15 @@ def scoreboard():
             'p1': laatste_score.p1 if laatste_score else 0,
             'p2': laatste_score.p2 if laatste_score else 0,
             'p3': laatste_score.p3 if laatste_score else 0,
-            'Subtotaal': speler.subtotaal or 0,
+            'subtotaal': speler.totaal or 0,
             'totaal': speler.totaal or 0,
-            'serie' : speler.serie or 0
         })
 
-    return render_template('scoreboard.html', data=scoreboard_data, aantal_pijlen=aantal_pijlen)
+    return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen})
+
+@app.route('/scoreboard')
+def scoreboard():
+    return render_template('scoreboard.html')
 
 @app.route('/reset')
 def reset_scores():
