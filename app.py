@@ -133,25 +133,21 @@ from flask import jsonify
 
 @app.route('/api/scoreboard')
 def api_scoreboard():
-    competitie = session.get('competitie', '3')
-    aantal_pijlen = int(competitie)
+    aantal_pijlen = int(session.get('competitie', 3))
     klasse = session.get('klasse', '')
 
-    # Bepaal hoogste serie-nummer in deze competitie
-    huidige_serie = db.session.query(db.func.max(Score.serie)) \
-        .filter(Score.competitie == competitie).scalar()
-    huidige_serie = huidige_serie or 0
+    # Hoogste serie zoeken (geen competitie-filter nodig)
+    huidige_serie = db.session.query(db.func.max(Score.serie)).scalar() or 0
 
     spelers = db.session.query(
         Score.naam,
         db.func.sum(Score.subtotaal).label('totaal'),
         db.func.max(Score.id).label('laatste_id')
-    ).filter(Score.competitie == competitie) \
-     .group_by(Score.naam).order_by(db.desc('totaal')).all()
+    ).group_by(Score.naam).order_by(db.desc('totaal')).all()
 
     scoreboard_data = []
     for i, speler in enumerate(spelers, start=1):
-        laatste_score = Score.query.filter_by(naam=speler.naam, competitie=competitie).order_by(Score.id.desc()).first()
+        laatste_score = Score.query.filter_by(naam=speler.naam).order_by(Score.id.desc()).first()
         scoreboard_data.append({
             'rang': i,
             'naam': speler.naam,
@@ -160,7 +156,7 @@ def api_scoreboard():
             'p2': laatste_score.p2 if laatste_score and aantal_pijlen == 3 else '',
             'p3': laatste_score.p3 if laatste_score and aantal_pijlen == 3 else '',
             'subtotaal': laatste_score.subtotaal if laatste_score else 0,
-            'totaal': speler.totaal or 0,
+            'totaal': speler.totaal or 0
         })
 
     return jsonify({
@@ -169,6 +165,7 @@ def api_scoreboard():
         'klasse': klasse,
         'huidige_serie': huidige_serie
     })
+
 
 @app.route('/scoreboard')
 def scoreboard():
