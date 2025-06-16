@@ -84,10 +84,11 @@
 
   <form method="POST"  id="competitie-form" >
     <label for="competitie">Kies een competitie:</label>
-    <select name="competitie" id="competitie" onchange="submitFormOnChange()" required>
-        <option value="3">Indoor</option>
-        <option value="1">25m1p</option>
+    <select name="competitie" id="competitie-form" onchange="submitFormOnChange()" required>
+        <option value="3" {% if geselecteerd == '3' %}selected{% endif %}>Indoor</option>
+        <option value="1" {% if geselecteerd == '1' %}selected{% endif %}>25m1p</option>
     </select>
+
   </form>
 
 </body>

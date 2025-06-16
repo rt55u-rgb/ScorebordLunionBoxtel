@@ -39,8 +39,12 @@ def wedstrijdleiding():
         if competitie:
             session['competitie'] = competitie
             session.modified = True
-            return redirect(url_for('wedstrijdleiding'))
-    return render_template('wedstrijdleiding.html')
+            return redirect(url_for('wedstrijdleiding'))  # blijf op deze pagina
+
+    huidige_competitie = session.get('competitie', '3')  # standaard 3
+
+    return render_template('wedstrijdleiding.html', geselecteerd=huidige_competitie)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
