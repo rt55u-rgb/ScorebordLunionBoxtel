@@ -49,7 +49,7 @@ def wedstrijdleiding():
             db.session.commit()
 
             NieuweComp = Competitie(
-                CompetitieKeuzeu=nieuwe_competitie
+                CompetitieKeuze=nieuwe_competitie
             )
 
             db.session.add(NieuweComp)
