@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: white;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 400px;
+      border: 1px solid #000;
+      text-align: center;
+      background-color: #f9f9f9;
+    }
+
+    .header {
+      background-color: #0056b3; /* Donkerblauw */
+      color: white;
+      padding: 20px 10px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+
+    .logo {
+      height: 35px;
+      width: auto;
+      max-width: 100%;
+    }
+
+    form {
+      padding: 30px 15px;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 20px;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 25px;
+      border: 1px solid black;
+      border-radius: 4px;
+    }
+
+    input[type="submit"] {
+      background-color: #607d8b;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <img src="{{ url_for('static', filename='lunion3_no_background.png') }}" alt="Logo" class="logo">
+      Scoresysteem L'union Boxtel
+    </div>
+    <form method="POST">
+      <label for="naam">Naam:</label>
+      <input type="text" name="naam" id="naam" placeholder="Vul hier je naam in" required>
+       <select name="klasse" id="klasse" required>
+        <option value="">-- Selecteer een klassse --</option>
+        <option value="Recurve">Recurve</option>
+        <option value="Compound">Compound</option>
+        <option value="Barebow">Barebow</option>
+        <option value="Hout">Hout</option>
+      </select>
+      <input type="submit" value="Inloggen">
+    </form>
+  </div>
+
+</body>
+</html>
+

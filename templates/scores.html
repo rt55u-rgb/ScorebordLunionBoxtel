@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="15">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scores</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    header {
+      background-color: #0056b3;
+      color: white;
+      padding: 15px 10px;
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo {
+      height: 35px;
+      width: auto;
+      max-width: 100%;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto 30px auto;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      margin: 5px 0 15px 0;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #0056b3;
+      color: white;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #003d80;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .logout-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .logout-link {
+      background-color: #0056b3;
+      color: white;
+      padding: 12px 20px;
+      text-decoration: none;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .logout-link:hover {
+      background-color: #3b4b5c;
+    }
+
+    @media (max-width: 480px) {
+      header {
+        font-size: 18px;
+      }
+
+      th, td {
+        font-size: 12px;
+      }
+
+      input[type="number"], button {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="{{ url_for('static', filename='lunion3_no_background.png') }}" alt="Logo" class="logo">
+    Welkom, {{ session['user'] }}
+    <label> {{ session['Klasse'] }}</label>
+  </header>
+
+  <form method="POST" action="{{ url_for('scores') }}">
+    <label>Pijl 1:</label>
+    <input type="number" name="p1" placeholder="Waarde" required min="0" max="10">
+    
+    {% if aantal_pijlen == 3 %}
+    <label>Pijl 2:</label>
+    <input type="number" name="p2" placeholder="Waarde" required min="0" max="10">
+
+    <label>Pijl 3:</label>
+    <input type="number" name="p3" placeholder="Waarde" required min="0" max="10">
+    {% endif %}
+    <button type="submit">Verzenden</button>
+  </form>
+ 
+  <table>
+    <tr>
+      <th>Serie</th>
+      <th>Pijl 1</th>
+      {% if aantal_pijlen == 3 %}
+      <th>Pijl 2</th>
+      <th>Pijl 3</th>
+       {% endif %}
+      <th>Sub totaal</th>
+      <th>Totaal</th>
+    </tr>
+    {% for score in scores %}
+    <tr>
+      <td>{{ score.serie }}</td>
+      <td>{{ score.p1 }}</td>
+      {% if aantal_pijlen == 3 %}
+      <td>{{ score.p2 }}</td>
+      <td>{{ score.p3 }}</td>
+      {% endif %}
+      <td>{{ score.subtotaal }}</td>
+      <td>{{ score.totaal }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div class="logout-container">
+    <a class="logout-link" href="{{ url_for('logout') }}" onclick="return confirm('Weet je zeker dat je uit wil loggen?');">
+      Log uit
+    </a>
+  </div>
+
+</body>
+</html>
+

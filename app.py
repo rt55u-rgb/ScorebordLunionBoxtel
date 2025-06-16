@@ -1,0 +1,155 @@
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
+
+import click
+
+app = Flask(__name__)
+app.secret_key = 'jouw_geheime_key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+db = SQLAlchemy(app)
+
+class Score(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    naam = db.Column(db.String(150), nullable=False)
+    p1 = db.Column(db.Integer)
+    p2 = db.Column(db.Integer)
+    p3 = db.Column(db.Integer)
+    serie = db.Column(db.Integer)
+    subtotaal = db.Column(db.Integer)
+    totaal = db.Column(db.Integer)
+    
+
+@app.cli.command("init-db")
+def init_db():
+    db.create_all()
+    click.echo("Database en tabellen succesvol aangemaakt.")
+
+@app.route('/')
+def index():
+    if 'user' in session:
+        return redirect(url_for('scores'))
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        naam = request.form['naam'].strip()
+        klasse = request.form['klasse']
+        session['klasse'] = klasse
+        if naam:
+            session['user'] = naam
+            return redirect(url_for('scores'))
+        else:
+            return "Vul alsjeblieft een naam in."
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    if 'user' in session:
+        naam = session['user']
+        # Verwijder scores van deze gebruiker
+        Score.query.filter_by(naam=naam).delete()
+        db.session.commit()
+        # Verwijder uit session
+        session.pop('user', None)
+    return redirect(url_for('login'))
+
+@app.route('/scores', methods=['GET', 'POST'])
+def scores():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    naam = session['user']
+
+    if request.method == 'POST':
+        try:
+            p1 = int(request.form.get('p1',0))
+            p2 = int(request.form.get('p2',0))
+            p3 = int(request.form.get('p3',0))
+        except ValueError:
+            return "Voer geldige nummers in voor de pijlen."
+
+        # Bepaal de nieuwe serie
+        laatste_serie = db.session.query(db.func.max(Score.serie)).filter_by(naam=naam).scalar()
+        if laatste_serie is None:
+            laatste_serie = 0
+        nieuwe_serie = laatste_serie + 1
+
+        # Subtotaal van deze serie
+        subtotaal = p1 + p2 + p3
+
+        # Huidige totaal berekenen (alle eerdere subtotale scores)
+        eerder_subtotaal = db.session.query(db.func.sum(Score.subtotaal)).filter_by(naam=naam).scalar()
+        if eerder_subtotaal is None:
+            eerder_subtotaal = 0
+
+        totaal = eerder_subtotaal + subtotaal
+
+        # Nieuwe score opslaan
+        score = Score(
+            naam=naam,
+            p1=p1,
+            p2=p2,
+            p3=p3,
+            serie=nieuwe_serie,
+            subtotaal=subtotaal,
+            totaal=totaal
+        )
+        db.session.add(score)
+        db.session.commit()
+
+        return redirect(url_for('scores'))
+
+    # Laatste 10 scores van deze gebruiker tonen
+    laatste_scores = Score.query.filter_by(naam=naam).order_by(Score.id.desc()).limit(10).all()
+    return render_template('scores.html', scores=laatste_scores, aantal_pijlen=aantal_pijlen_per_serie)
+
+@app.route('/scoreboard')
+def scoreboard():
+    competitie = request.form['competitie']
+    competitieKeuze = session['competitie']
+    
+   
+    
+    naam = session['user']
+    
+    # Haal alle spelers en tel hun totaalscores op
+    spelers = db.session.query(
+        Score.naam,
+        db.func.sum(Score.subtotaal).label('totaal'),
+        db.func.max(Score.id).label('laatste_id'),
+        Score.subtotaal,
+        Score.serie,
+    ).group_by(Score.naam).order_by(db.desc('totaal')).all()
+
+    # Per speler ook de laatste serie ophalen (voor de pijlwaarden)
+    scoreboard_data = []
+    for i, speler in enumerate(spelers, start=1):
+        laatste_score = Score.query.filter_by(naam=speler.naam).order_by(Score.id.desc()).first()
+        scoreboard_data.append({
+            'rang': i,
+            'naam': speler.naam,
+            'p1': laatste_score.p1 if laatste_score else 0,
+            'p2': laatste_score.p2 if laatste_score else 0,
+            'p3': laatste_score.p3 if laatste_score else 0,
+            'Subtotaal': speler.subtotaal or 0,
+            'totaal': speler.totaal or 0,
+            'serie' : speler.serie or 0
+        })
+
+    return render_template('scoreboard.html', data=scoreboard_data, aantal_pijlen=aantal_pijlen_per_serie)
+
+@app.route('/reset')
+def reset_scores():
+    # Verwijder alle scores
+    db.session.query(Score).delete()
+    db.session.commit()
+
+    # Verwijder huidige sessie zodat gebruiker op /scores wordt uitgelogd
+    session.pop('user', None)
+
+    return redirect(url_for('scoreboard'))
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()  # Zorg dat tabellen aangemaakt zijn vóór de app start
+    app.run(debug=True)

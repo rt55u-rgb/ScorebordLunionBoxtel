@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta http-equiv="refresh" content="5">
+  <title>Scorebord</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      background-color: #0056b3;
+      color: white;
+      padding: 15px;
+      font-size: 24px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px; /* ruimte tussen logo en tekst */
+      box-sizing: border-box;
+    }
+
+    .logo {
+      height: 40px;
+      width: auto;
+    }
+
+    main {
+      background-color: white;
+      padding: 30px;
+      margin-top: 20px;
+      border: 1px solid #000;
+      position: relative;
+      width: 600px;
+    }
+
+    .top-right-text {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #4a5a6a;
+      color: white;
+    }
+
+    .reset-container {
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    .reset-link {
+      background-color: #0056b3;
+      color: white;
+      padding: 10px 16px;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .reset-link:hover {
+      background-color: #2f3e4d;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="{{ url_for('static', filename='lunion3_no_background.png') }}"  alt="Logo" class="logo">
+    Scorebord
+    
+    <select name="competitie" id="competitie" required>
+        <option value="">-- Selecteer een competitie --</option>
+        <option value="3">Indoor</option>
+        <option value="1">25m1p</option>
+      </select>
+  </header>
+
+  <main>
+    {% if data|length > 0 %}
+    <div class="top-right-text">Serie: {{ data[0].serie }}</div>
+    {% else %}
+    <div class="top-right-text">Nog geen series geschoten</div>
+    {% endif %}
+    <table>
+      <thead>
+        <tr>
+          <th>Nm.</th>
+          <th>Naam</th>
+          <th>klasse</th>
+          <th>Pijl 1</th>
+          {% if aantal_pijlen == 3 %}
+          <th>Pijl 2</th>
+          <th>Pijl 3</th>
+          {% endif %}
+          <th>Subtotaal</th>
+          <th>Totaal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for speler in data %}
+        <tr>
+          <td>{{ speler.rang }}</td>
+          <td>{{ speler.naam }}</td>
+          <td>{{ session['klasse'] }}</td>
+          <td>{{ speler.p1 }}</td>
+          {% if aantal_pijlen == 3 %}
+          <td>{{ speler.p2 }}</td>
+          <td>{{ speler.p3 }}</td>
+          {% endif %}
+          <td>{{ speler.Subtotaal }}</td>
+          <td>{{ speler.totaal }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="reset-container">
+      <a class="reset-link" href="{{ url_for('reset_scores') }}" onclick="return confirm('Weet je zeker dat je alle scores wilt wissen?');">
+        Reset score
+      </a>
+    </div>
+  </main>
+
+</body>
+</html>
+
