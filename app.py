@@ -101,7 +101,7 @@ def scores():
 
     # Laatste 10 scores van deze gebruiker tonen
     laatste_scores = Score.query.filter_by(naam=naam).order_by(Score.id.desc()).limit(10).all()
-    return render_template('scores.html', scores=laatste_scores, aantal_pijlen=aantal_pijlen_per_serie)
+    return render_template('scores.html', scores=laatste_scores)
 
 @app.route('/scoreboard')
 def scoreboard():
@@ -136,7 +136,7 @@ def scoreboard():
             'serie' : speler.serie or 0
         })
 
-    return render_template('scoreboard.html', data=scoreboard_data, aantal_pijlen=aantal_pijlen_per_serie)
+    return render_template('scoreboard.html', data=scoreboard_data)
 
 @app.route('/reset')
 def reset_scores():
