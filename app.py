@@ -32,12 +32,14 @@ def index():
         return redirect(url_for('scores'))
     return redirect(url_for('login'))
 
-@app.route('/wedstrijdleiding', methods=['GET','POST'])
+@app.route('/wedstrijdleiding', methods=['GET', 'POST'])
 def wedstrijdleiding():
     if request.method == 'POST':
-        competitie = request.form['competitie']
-        session['competitie'] = competitie
-        return redirect(url_for('wedstrijdleiding')) 
+        competitie = request.form.get('competitie')
+        if competitie:
+            session['competitie'] = competitie
+            session.modified = True
+            return redirect(url_for('wedstrijdleiding'))
     return render_template('wedstrijdleiding.html')
 
 @app.route('/login', methods=['GET', 'POST'])
