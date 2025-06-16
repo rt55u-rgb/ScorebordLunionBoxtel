@@ -32,24 +32,35 @@ def index():
         return redirect(url_for('scores'))
     return redirect(url_for('login'))
 
+def read_competitie():
+    try:
+        with open('competitie.txt', 'r') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return '3'  # default indoor
+
+def write_competitie(new_competitie):
+    with open('competitie.txt', 'w') as f:
+        f.write(new_competitie)
+
 @app.route('/wedstrijdleiding', methods=['GET', 'POST'])
 def wedstrijdleiding():
-    vorige_competitie = app.config.get('COMPETITIE', None)
+    vorige_competitie = read_competitie()
 
     if request.method == 'POST':
         nieuwe_competitie = request.form.get('competitie')
 
         if nieuwe_competitie:
-            # Als de competitie verandert, verwijder alle scores
             if vorige_competitie and nieuwe_competitie != vorige_competitie:
                 db.session.query(Score).delete()
                 db.session.commit()
 
-            app.config['COMPETITIE'] = nieuwe_competitie
+            write_competitie(nieuwe_competitie)
             return redirect(url_for('wedstrijdleiding'))
 
-    huidige_competitie = app.config.get('COMPETITIE', '3')  # standaard indoor
+    huidige_competitie = read_competitie()
     return render_template('wedstrijdleiding.html', geselecteerd=huidige_competitie)
+
 
 
 
@@ -132,7 +143,7 @@ from flask import jsonify
 
 @app.route('/api/scoreboard')
 def api_scoreboard():
-    aantal_pijlen = int(app.config.get('COMPETITIE', 3))
+    aantal_pijlen = int(read_competitie())
     klasse = session.get('klasse', '')
 
     # Hoogste serie zoeken (geen competitie-filter nodig)
