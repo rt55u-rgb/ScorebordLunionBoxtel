@@ -160,7 +160,9 @@ def api_scoreboard():
 
 @app.route('/scoreboard')
 def scoreboard():
-    return render_template('scoreboard.html')
+    competitie = session.get('competitie', '3')  # default naar 3 pijlen
+    aantal_pijlen = int(competitie)
+    return render_template('scoreboard.html', aantal_pijlen=aantal_pijlen)
 
 @app.route('/reset')
 def reset_scores():
