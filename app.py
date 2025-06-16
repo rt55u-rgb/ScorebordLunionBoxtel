@@ -115,6 +115,7 @@ def scores():
 
 @app.route('/scoreboard')
 def scoreboard():
+    print("Session inhoud:", session)
     competitie = session.get('competitie', '3')  # default naar 3 pijlen
     aantal_pijlen = int(competitie)
     # Haal alle spelers en tel hun totaalscores op
