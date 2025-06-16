@@ -32,35 +32,44 @@ def index():
         return redirect(url_for('scores'))
     return redirect(url_for('login'))
 
-def read_competitie():
-    try:
-        with open('competitie.txt', 'r') as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        return '3'  # default indoor
+class Config(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True, nullable=False)
+    value = db.Column(db.String(100), nullable=False)
 
-def write_competitie(new_competitie):
-    with open('competitie.txt', 'w') as f:
-        f.write(new_competitie)
+def get_competitie():
+    config = Config.query.filter_by(key='competitie').first()
+    if config:
+        return int(config.value)
+    else:
+        # default competitie (bijv. 3 pijlen)
+        return 3
+
+def set_competitie(nieuwe_waarde):
+    config = Config.query.filter_by(key='competitie').first()
+    if config:
+        config.value = str(nieuwe_waarde)
+    else:
+        config = Config(key='competitie', value=str(nieuwe_waarde))
+        db.session.add(config)
+    db.session.commit()
+
 
 @app.route('/wedstrijdleiding', methods=['GET', 'POST'])
 def wedstrijdleiding():
-    vorige_competitie = read_competitie()
+    oude_competitie = get_competitie()
 
     if request.method == 'POST':
-        nieuwe_competitie = request.form.get('competitie')
+        nieuwe_competitie = int(request.form.get('competitie'))
+        if nieuwe_competitie != oude_competitie:
+            # Verwijder alle scores als competitie verandert
+            db.session.query(Score).delete()
+            db.session.commit()
+            set_competitie(nieuwe_competitie)
+        return redirect(url_for('wedstrijdleiding'))
 
-        if nieuwe_competitie:
-            if vorige_competitie and nieuwe_competitie != vorige_competitie:
-                db.session.query(Score).delete()
-                db.session.commit()
-
-            write_competitie(nieuwe_competitie)
-            return redirect(url_for('wedstrijdleiding'))
-
-    huidige_competitie = read_competitie()
+    huidige_competitie = get_competitie()
     return render_template('wedstrijdleiding.html', geselecteerd=huidige_competitie)
-
 
 
 
@@ -143,11 +152,8 @@ from flask import jsonify
 
 @app.route('/api/scoreboard')
 def api_scoreboard():
-    aantal_pijlen = int(read_competitie())
-    klasse = session.get('klasse', '')
-
-    # Hoogste serie zoeken (geen competitie-filter nodig)
-    huidige_serie = db.session.query(db.func.max(Score.serie)).scalar() or 0
+    aantal_pijlen = get_competitie()  # centraal uit db halen
+    klasse = session.get('klasse', '')  # of waar je klasse ook opslaat
 
     spelers = db.session.query(
         Score.naam,
@@ -163,18 +169,13 @@ def api_scoreboard():
             'naam': speler.naam,
             'klasse': klasse,
             'p1': laatste_score.p1 if laatste_score else 0,
-            'p2': laatste_score.p2 if laatste_score and aantal_pijlen == 3 else '',
-            'p3': laatste_score.p3 if laatste_score and aantal_pijlen == 3 else '',
-            'subtotaal': laatste_score.subtotaal if laatste_score else 0,
-            'totaal': speler.totaal or 0
+            'p2': laatste_score.p2 if laatste_score else 0,
+            'p3': laatste_score.p3 if laatste_score else 0,
+            'subtotaal': speler.totaal or 0,
+            'totaal': speler.totaal or 0,
         })
 
-    return jsonify({
-        'data': scoreboard_data,
-        'aantal_pijlen': aantal_pijlen,
-        'klasse': klasse,
-        'huidige_serie': huidige_serie
-    })
+    return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen, 'klasse': klasse})
 
 
 @app.route('/scoreboard')
