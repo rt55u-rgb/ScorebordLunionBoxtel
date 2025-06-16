@@ -30,6 +30,12 @@ def index():
         return redirect(url_for('scores'))
     return redirect(url_for('login'))
 
+@app.route('/wedstrijdleiding', methods=['GET','POST'])
+def wedstrijdleiding():
+    if request.method == 'POST':
+        competitie = request.form['competitie']
+        session['competitie'] = competitie
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':

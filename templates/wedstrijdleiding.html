@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="15">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competitie Kiezen</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    header {
+      background-color: #0056b3;
+      color: white;
+      padding: 15px 10px;
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo {
+      height: 35px;
+      width: auto;
+      max-width: 100%;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 480px) {
+      header {
+        font-size: 18px;
+      }
+
+      select {
+        font-size: 15px;
+      }
+    }
+  </style>
+  <script>
+    function submitFormOnChange() {
+      document.getElementById('competitie-form').submit();
+    }
+  </script>
+</head>
+<body>
+
+  <header>
+    <img src="{{ url_for('static', filename='lunion3_no_background.png') }}" alt="Logo" class="logo">
+    Wedstrijdleiding
+  </header>
+
+  <form method="POST" >
+    <label for="competitie">Kies een competitie:</label>
+    <select name="competitie" id="competitie" onchange="submitFormOnChange()" required>
+        <option value="Indoor">Indoor</option>
+        <option value="25m1p">25m1p</option>
+    </select>
+  </form>
+
+</body>
+</html>

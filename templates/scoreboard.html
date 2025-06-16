@@ -91,12 +91,6 @@
   <header>
     <img src="{{ url_for('static', filename='lunion3_no_background.png') }}"  alt="Logo" class="logo">
     Scorebord
-    
-    <select name="competitie" id="competitie" required>
-        <option value="">-- Selecteer een competitie --</option>
-        <option value="3">Indoor</option>
-        <option value="1">25m1p</option>
-      </select>
   </header>
 
   <main>
@@ -112,7 +106,7 @@
           <th>Naam</th>
           <th>klasse</th>
           <th>Pijl 1</th>
-          {% if aantal_pijlen == 3 %}
+          {% if {{ session['Klasse'] }} == 'Indoor' %}
           <th>Pijl 2</th>
           <th>Pijl 3</th>
           {% endif %}
@@ -127,7 +121,7 @@
           <td>{{ speler.naam }}</td>
           <td>{{ session['klasse'] }}</td>
           <td>{{ speler.p1 }}</td>
-          {% if aantal_pijlen == 3 %}
+          {% if {{ session['Klasse'] }} == 'Indoor' %}
           <td>{{ speler.p2 }}</td>
           <td>{{ speler.p3 }}</td>
           {% endif %}
