@@ -94,7 +94,12 @@
   </header>
 
   <main>
-    <p>Aantal pijlen: {{ aantal_pijlen }}</p>
+    {% if aantal_pijlen == 1 %}
+    <p>Competitie: 25 meter 1 pijl</p>
+    {%else%}
+    <p>Competitie: Indoor</p>
+    {%endif%}
+    
     {% if data|length > 0 %}
     <div class="top-right-text">Serie: {{ data[0].serie }}</div>
     {% else %}
