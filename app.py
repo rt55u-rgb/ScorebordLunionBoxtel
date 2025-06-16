@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
-
+from flask import jsonify
 import click
 
 app = Flask(__name__)
@@ -134,6 +134,7 @@ from flask import jsonify
 @app.route('/api/scoreboard')
 def api_scoreboard():
     aantal_pijlen = session.get('competitie', 3)  # standaard 3 pijlen als fallback
+    klasse = session.get('klasse', '')
 
     spelers = db.session.query(
         Score.naam,
@@ -147,6 +148,7 @@ def api_scoreboard():
         scoreboard_data.append({
             'rang': i,
             'naam': speler.naam,
+            'klasse': klasse,
             'p1': laatste_score.p1 if laatste_score else 0,
             'p2': laatste_score.p2 if laatste_score else 0,
             'p3': laatste_score.p3 if laatste_score else 0,
@@ -154,7 +156,7 @@ def api_scoreboard():
             'totaal': speler.totaal or 0,
         })
 
-    return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen})
+    return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen, 'klasse':klasse})
 
 @app.route('/scoreboard')
 def scoreboard():
