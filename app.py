@@ -82,6 +82,7 @@ def logout():
 def scores():
     competitie = session.get('competitie', '3')  # default naar 3 pijlen
     aantal_pijlen = int(competitie)
+
     if 'user' not in session:
         return redirect(url_for('login'))
     naam = session['user']
@@ -89,7 +90,6 @@ def scores():
     if request.method == 'POST':
         try:
             p1 = int(request.form.get('p1',0))
-            
             p2 = int(request.form.get('p2',0))
             p3 = int(request.form.get('p3',0))
         except ValueError:
@@ -134,15 +134,14 @@ def scores():
     laatste_scores = Score.query.filter_by(naam=naam).order_by(Score.id.desc()).limit(10).all()
     return render_template('scores.html', scores=laatste_scores, aantal_pijlen=aantal_pijlen)
 
-from flask import jsonify
 
 @app.route('/api/scoreboard')
 def api_scoreboard():
     aantal_pijlen = session.get('competitie', 3)  # standaard 3 pijlen als fallback
     klasse = session.get('klasse', '')
-
     spelers = db.session.query(
         Score.naam,
+        Score.serie,
         db.func.sum(Score.subtotaal).label('totaal'),
         db.func.max(Score.id).label('laatste_id')
     ).group_by(Score.naam).order_by(db.desc('totaal')).all()
@@ -160,8 +159,10 @@ def api_scoreboard():
             'subtotaal': speler.totaal or 0,
             'totaal': speler.totaal or 0,
         })
+        
+        serie = speler.serie
 
-    return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen, 'klasse':klasse})
+    return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen, 'klasse':klasse, 'serie':serie})
 
 @app.route('/scoreboard')
 def scoreboard():
