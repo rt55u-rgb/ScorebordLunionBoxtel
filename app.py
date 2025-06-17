@@ -4,7 +4,7 @@ from flask import jsonify
 import click
 
 app = Flask(__name__)
-app.secret_key = 'jouw_geheime_key'
+app.secret_key = 'BestuurLunionBoxtel1840'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
