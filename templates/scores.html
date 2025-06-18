@@ -140,14 +140,14 @@
 
   <form method="POST" action="{{ url_for('scores') }}">
     <label>Pijl 1:</label>
-    <input type="number" name="p1" placeholder="Waarde" required min="0" max="10">
+    <input type="number" name="p1" placeholder="Punten" required min="0" max="10">
     
     {% if aantal_pijlen == 3 %}
     <label>Pijl 2:</label>
-    <input type="number" name="p2" placeholder="Waarde" required min="0" max="10">
+    <input type="number" name="p2" placeholder="Punten" required min="0" max="10">
 
     <label>Pijl 3:</label>
-    <input type="number" name="p3" placeholder="Waarde" required min="0" max="10">
+    <input type="number" name="p3" placeholder="Punten" required min="0" max="10">
     {% endif %}
     <button type="submit">Verzenden</button>
   </form>
