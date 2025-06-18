@@ -157,7 +157,7 @@ def api_scoreboard():
             'p1': laatste_score.p1 if laatste_score else 0,
             'p2': laatste_score.p2 if laatste_score else 0,
             'p3': laatste_score.p3 if laatste_score else 0,
-            'subtotaal': speler.totaal or 0,
+            'subtotaal': speler.subtotaal or 0,
             'totaal': speler.totaal or 0,
         })
 
