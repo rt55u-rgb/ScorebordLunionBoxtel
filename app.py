@@ -1,3 +1,4 @@
+@ -1,211 +1,212 @@
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
@@ -90,7 +91,7 @@ def logout():
         # Verwijder scores van deze gebruiker
         Score.query.filter_by(naam=naam).delete()
         db.session.commit()
-        
+        # Verwijder uit session
         session.pop('user', None)
     return redirect(url_for('login'))
 
@@ -124,7 +125,7 @@ def scores():
             subtotaal = p1 + p2 + p3
         
 
-        # Huidige totaal berekenen 
+        # Huidige totaal berekenen (alle eerdere subtotale scores)
         eerder_subtotaal = db.session.query(db.func.sum(Score.subtotaal)).filter_by(naam=naam).scalar()
         if eerder_subtotaal is None:
             eerder_subtotaal = 0
@@ -165,8 +166,22 @@ def api_scoreboard():
     scoreboard_data = []
     huidige_serie = 0
     for i, speler in enumerate(spelers, start=1):
+        laatste_score = Score.query.filter_by(naam=speler.naam).order_by(Score.id.desc()).first()
         laatste_score = Score.query.get(speler.laatste_id)
         if laatste_score:
+            huidige_serie = max(huidige_serie, laatste_score.serie)
+        scoreboard_data.append({
+            'rang': i,
+            'naam': speler.naam,
+            'klasse': klasse,
+            'p1': laatste_score.p1 if laatste_score else 0,
+            'p2': laatste_score.p2 if laatste_score else 0,
+            'p3': laatste_score.p3 if laatste_score else 0,
+            'subtotaal': laatste_score.subtotaal if laatste_score else 0,
+            'totaal': speler.totaal or 0,
+        })
+
+    return jsonify({
              huidige_serie = max(huidige_serie, laatste_score.serie)
     scoreboard_data.append({
         'rang': i,
@@ -200,12 +215,12 @@ def reset_scores():
     db.session.query(Score).delete()
     db.session.commit()
 
-    #log user uit
+    # Verwijder huidige sessie zodat gebruiker op /scores wordt uitgelogd
     session.pop('user', None)
 
     return redirect(url_for('scoreboard'))
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  
+        db.create_all()  # Zorg dat tabellen aangemaakt zijn vóór de app start
     app.run(debug=True)
