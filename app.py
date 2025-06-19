@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True)
-    #sessie relatie
+   
     sessions = relationship('UserSession', back_populates='user', cascade='all, delete-orphan')
 
 
@@ -29,6 +29,7 @@ class UserSession(db.Model):
 class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     naam = db.Column(db.String(150), nullable=False)
+    klasse = db.Column(db.String(150))
     p1 = db.Column(db.Integer)
     p2 = db.Column(db.Integer)
     p3 = db.Column(db.Integer)
@@ -90,7 +91,7 @@ def logout():
         # Verwijder scores van deze gebruiker
         Score.query.filter_by(naam=naam).delete()
         db.session.commit()
-        # Verwijder uit session
+        
         session.pop('user', None)
     return redirect(url_for('login'))
 
@@ -124,7 +125,7 @@ def scores():
             subtotaal = p1 + p2 + p3
         
 
-        # Huidige totaal berekenen (alle eerdere subtotale scores)
+        # Huidige totaal berekenen 
         eerder_subtotaal = db.session.query(db.func.sum(Score.subtotaal)).filter_by(naam=naam).scalar()
         if eerder_subtotaal is None:
             eerder_subtotaal = 0
@@ -134,6 +135,7 @@ def scores():
         # Nieuwe score opslaan
         score = Score(
             naam=naam,
+            klasse=session.get('klasse'),
             p1=p1,
             p2=p2,
             p3=p3,
@@ -158,6 +160,7 @@ def api_scoreboard():
     klasse = session.get('klasse', '')
     spelers = db.session.query(
         Score.naam,
+        Score.klasse,
         db.func.sum(Score.subtotaal).label('totaal'),
         db.func.max(Score.id).label('laatste_id')
     ).group_by(Score.naam).order_by(db.desc('totaal')).all()
@@ -171,7 +174,7 @@ def api_scoreboard():
     scoreboard_data.append({
         'rang': i,
         'naam': speler.naam,
-        'klasse': klasse,
+        'klasse': speler.klasse,
         'p1': laatste_score.p1 if laatste_score else 0,
         'p2': laatste_score.p2 if laatste_score else 0,
         'p3': laatste_score.p3 if laatste_score else 0,
@@ -200,12 +203,12 @@ def reset_scores():
     db.session.query(Score).delete()
     db.session.commit()
 
-    # Verwijder huidige sessie zodat gebruiker op /scores wordt uitgelogd
+    #log user uit
     session.pop('user', None)
 
     return redirect(url_for('scoreboard'))
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Zorg dat tabellen aangemaakt zijn vóór de app start
+        db.create_all()  
     app.run(debug=True)
