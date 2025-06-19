@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True)
-   
+    #sessie relatie
     sessions = relationship('UserSession', back_populates='user', cascade='all, delete-orphan')
 
 
@@ -29,7 +29,6 @@ class UserSession(db.Model):
 class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     naam = db.Column(db.String(150), nullable=False)
-    klasse = db.Column(db.String(150))
     p1 = db.Column(db.Integer)
     p2 = db.Column(db.Integer)
     p3 = db.Column(db.Integer)
@@ -135,7 +134,6 @@ def scores():
         # Nieuwe score opslaan
         score = Score(
             naam=naam,
-            klasse=session.get('klasse'),
             p1=p1,
             p2=p2,
             p3=p3,
@@ -160,7 +158,6 @@ def api_scoreboard():
     klasse = session.get('klasse', '')
     spelers = db.session.query(
         Score.naam,
-        Score.klasse,
         db.func.sum(Score.subtotaal).label('totaal'),
         db.func.max(Score.id).label('laatste_id')
     ).group_by(Score.naam).order_by(db.desc('totaal')).all()
@@ -174,7 +171,7 @@ def api_scoreboard():
     scoreboard_data.append({
         'rang': i,
         'naam': speler.naam,
-        'klasse': speler.klasse,
+        'klasse': klasse,
         'p1': laatste_score.p1 if laatste_score else 0,
         'p2': laatste_score.p2 if laatste_score else 0,
         'p3': laatste_score.p3 if laatste_score else 0,
