@@ -165,21 +165,22 @@ def api_scoreboard():
     scoreboard_data = []
     huidige_serie = 0
     for i, speler in enumerate(spelers, start=1):
-        laatste_score = Score.query.filter_by(naam=speler.naam).order_by(Score.id.desc()).first()
+        laatste_score = Score.query.get(speler.laatste_id)
         if laatste_score:
-            huidige_serie = max(huidige_serie, laatste_score.serie)
-        scoreboard_data.append({
-            'rang': i,
-            'naam': speler.naam,
-            'klasse': klasse,
-            'p1': laatste_score.p1 if laatste_score else 0,
-            'p2': laatste_score.p2 if laatste_score else 0,
-            'p3': laatste_score.p3 if laatste_score else 0,
-            'subtotaal': laatste_score.subtotaal if laatste_score else 0,
-            'totaal': speler.totaal or 0,
-        })
+             huidige_serie = max(huidige_serie, laatste_score.serie)
+    scoreboard_data.append({
+        'rang': i,
+        'naam': speler.naam,
+        'klasse': klasse,
+        'p1': laatste_score.p1 if laatste_score else 0,
+        'p2': laatste_score.p2 if laatste_score else 0,
+        'p3': laatste_score.p3 if laatste_score else 0,
+        'subtotaal': laatste_score.subtotaal if laatste_score else 0,
+        'totaal': speler.totaal or 0,
+    })
 
-    return jsonify({
+
+    return jsonify({  
         'data': scoreboard_data,
         'aantal_pijlen': aantal_pijlen,
         'klasse': klasse,
