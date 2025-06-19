@@ -1,14 +1,30 @@
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from flask import jsonify
 import click
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'BestuurLunionBoxtel1840'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
+class User(db.Model):
+    id = Column(Integer, primary_key=True)
+    username = Column(String(80), unique=True)
+    #sessie relatie
+    sessions = relationship('UserSession', back_populates='user', cascade='all, delete-orphan')
 
+
+class UserSession(db.Model): 
+    id = Column(Integer, primary_key=True)
+    session_token = Column(String(64), unique=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user = relationship('User', back_populates='sessions')
 
 class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -138,7 +154,7 @@ from flask import jsonify
 
 @app.route('/api/scoreboard')
 def api_scoreboard():
-    aantal_pijlen = session.get('competitie', 3)  # standaard 3 pijlen als fallback
+    aantal_pijlen = session.get('competitie', 3)
     klasse = session.get('klasse', '')
 
     spelers = db.session.query(
@@ -148,8 +164,11 @@ def api_scoreboard():
     ).group_by(Score.naam).order_by(db.desc('totaal')).all()
 
     scoreboard_data = []
+    huidige_serie = 0
     for i, speler in enumerate(spelers, start=1):
         laatste_score = Score.query.filter_by(naam=speler.naam).order_by(Score.id.desc()).first()
+        if laatste_score:
+            huidige_serie = max(huidige_serie, laatste_score.serie)
         scoreboard_data.append({
             'rang': i,
             'naam': speler.naam,
@@ -157,11 +176,25 @@ def api_scoreboard():
             'p1': laatste_score.p1 if laatste_score else 0,
             'p2': laatste_score.p2 if laatste_score else 0,
             'p3': laatste_score.p3 if laatste_score else 0,
+<<<<<<< Updated upstream
             'subtotaal': speler.subtotaal or 0,
             'totaal': speler.totaal or 0,
         })
 
     return jsonify({'data': scoreboard_data, 'aantal_pijlen': aantal_pijlen, 'klasse':klasse})
+=======
+            'subtotaal': laatste_score.subtotaal if laatste_score else 0,
+            'totaal': speler.totaal or 0,
+        })
+
+    return jsonify({
+        'data': scoreboard_data,
+        'aantal_pijlen': aantal_pijlen,
+        'klasse': klasse,
+        'huidige_serie': huidige_serie
+    })
+
+>>>>>>> Stashed changes
 
 @app.route('/scoreboard')
 def scoreboard():
