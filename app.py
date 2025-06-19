@@ -177,6 +177,7 @@ def api_scoreboard():
             'p2': laatste_score.p2 if laatste_score else 0,
             'p3': laatste_score.p3 if laatste_score else 0,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             'subtotaal': speler.subtotaal or 0,
             'totaal': speler.totaal or 0,
         })
@@ -187,6 +188,12 @@ def api_scoreboard():
             'totaal': speler.totaal or 0,
         })
 
+=======
+            'subtotaal': laatste_score.subtotaal if laatste_score else 0,
+            'totaal': speler.totaal or 0,
+        })
+
+>>>>>>> Stashed changes
     return jsonify({
         'data': scoreboard_data,
         'aantal_pijlen': aantal_pijlen,
@@ -194,6 +201,9 @@ def api_scoreboard():
         'huidige_serie': huidige_serie
     })
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 @app.route('/scoreboard')
