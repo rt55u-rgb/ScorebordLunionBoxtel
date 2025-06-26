@@ -147,7 +147,7 @@ def scores():
         return redirect(url_for('scores'))
 
     # Laatste 10 scores van deze gebruiker tonen
-    laatste_scores = Score.query.filter_by(naam=naam).order_by(Score.id.desc()).limit(10).all()
+    laatste_scores = Score.query.filter_by(naam=naam).order_by(Score.id.asc()).limit(10).all()
     return render_template('scores.html', scores=laatste_scores, aantal_pijlen=aantal_pijlen)
 
 from flask import jsonify
