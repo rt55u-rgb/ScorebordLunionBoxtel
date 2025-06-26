@@ -127,13 +127,13 @@
         <tr>
           <td>{{ speler.rang }}</td>
           <td>{{ speler.naam }}</td>
-          <td>{{ session['klasse'] }}</td>
+          <td>{{ speler.klasse }}</td>
           <td>{{ speler.p1 }}</td>
           {% if aantal_pijlen == 3 %}
           <td>{{ speler.p2 }}</td>
           <td>{{ speler.p3 }}</td>
           {% endif %}
-          <td>{{ speler.Subtotaal }}</td>
+          <td>{{ speler.subtotaal }}</td>
           <td>{{ speler.totaal }}</td>
         </tr>
         {% endfor %}
@@ -186,6 +186,7 @@
         ${aantal_pijlen == 3 ? `<td>${speler.p2}</td><td>${speler.p3}</td>` : ''}
         <td>${speler.subtotaal}</td>
         <td>${speler.totaal}</td>
+
       `;
       tbody.appendChild(tr);
     });
@@ -195,7 +196,7 @@
   fetchScoreboard();
 
   // Elke 5 seconden opnieuw updaten
-  setInterval(fetchScoreboard, 5000);
+  setInterval(fetchScoreboard, 1000);
 </script>
 </html>
 
